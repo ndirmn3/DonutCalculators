@@ -829,11 +829,14 @@
       const next = getNextPayment(minK, maxK, last.payment, last.result, history, winRate);
       const peak = Math.max(0, ...history.map(r => r.net));
       const lossFromPeak = Math.max(0, peak - profit);
-      const profitTarget = Math.max(minK * 2, next * 1.15);
-      if (profit > 0 && profit >= profitTarget) return { stop: true, reason: `You're up ${moneyK(profit)}. The next wager is relatively large compared with the profit you have locked in. Consider stopping and keeping the profit.` };
-      const riskLimit = Math.max(minK * 8, next * 1.75);
-      if (profit <= 0 && Math.abs(profit) >= riskLimit) return { stop: true, reason: `STOP SUGGESTION: You're down ${moneyK(Math.abs(profit))}. The next suggested wager is too large relative to the session drawdown. Stop here rather than chasing the loss.` };
-      if (profit > 0 && lossFromPeak >= Math.max(minK * 3, profit * 0.75)) return { stop: true, reason: `STOP SUGGESTION: Your profit has fallen sharply from its recent peak. Protect the remaining profit instead of increasing risk.` };
+      const profitTarget = Math.max(minK * 1.75, next * 1.05);
+      if (profit > 0 && profit >= profitTarget) return { stop: true, reason: `You're up ${moneyK(profit)}. The next wager is getting large compared with the profit you have locked in. Consider stopping and keeping the profit.` };
+      const drawdownLimit = Math.max(minK * 2, Math.max(0, profit) * 0.40);
+      if (profit > 0 && lossFromPeak >= drawdownLimit) return { stop: true, reason: `STOP SUGGESTION: You've given back too much of the recent profit. Protect what remains instead of increasing risk.` };
+      const riskLimit = minK * 6;
+      if (profit <= 0 && Math.abs(profit) >= riskLimit) return { stop: true, reason: `STOP SUGGESTION: You're down ${moneyK(Math.abs(profit))}. The session loss limit has been reached, so stop instead of chasing the loss.` };
+      const maxSafeNext = Math.max(minK * 4, Math.max(0, profit) * 0.50);
+      if (next > maxSafeNext && profit <= minK * 2) return { stop: true, reason: `STOP SUGGESTION: The next wager would be too large for this session. Stop before a single loss can create a large drawdown.` };
       return { stop: false, reason: '' };
     }
 
@@ -847,11 +850,21 @@
     }
 
     function getLossProgression(lastPayment, min, max, history) {
-      const cumulativeLoss = Math.max(0, -(history || []).reduce((sum, r) => sum + r.net, 0));
-      const reference = Math.max(min, lastPayment * 3);
-      const decay = 1 + 0.42 * Math.log1p(cumulativeLoss / reference);
-      const increment = (Math.max(min, lastPayment) * 1.15) / decay;
-      return lastPayment + increment;
+      // Conservative loss progression: small increases at low wagers,
+      // then progressively smaller increases. This avoids runaway betting.
+      const totalProfit = (history || []).reduce((sum, r) => sum + r.net, 0);
+      const cumulativeLoss = Math.max(0, -totalProfit);
+      const ratio = lastPayment / min;
+      let multiplier;
+      if (ratio <= 2) multiplier = 1.12;
+      else if (ratio <= 4) multiplier = 1.08;
+      else if (ratio <= 6) multiplier = 1.04;
+      else multiplier = 1.02;
+
+      const reference = Math.max(min, lastPayment * 4);
+      const lossDecay = 1 + 0.75 * Math.log1p(cumulativeLoss / reference);
+      const increase = (lastPayment * (multiplier - 1)) / lossDecay;
+      return Math.min(max, lastPayment + increase);
     }
 
     function updatePaperGame() {
@@ -916,8 +929,12 @@
           const stop = getStopState(history, winRate, min, max);
           if (stop.stop) break;
           payment = getNextPayment(min, max, payment, won ? 'won' : 'lost', history, winRate);
-          const sessionRiskCap = Math.max(min * 25, min * 5 + Math.max(0, profit) * 0.75);
-          payment = Math.min(payment, sessionRiskCap);
+          // Hard cap the next wager at 4× the minimum unless the session
+          // has already built enough profit to justify a slightly larger bet.
+          const baseRiskCap = min * 4;
+          const profitBasedCap = min * 4 + Math.max(0, profit) * 0.35;
+          const sessionRiskCap = Math.min(max, profitBasedCap);
+          payment = Math.min(payment, sessionRiskCap, baseRiskCap);
         }
         results.push({ profit, totalPaid, totalReceived, wins, losses, rounds: wins + losses });
       }
