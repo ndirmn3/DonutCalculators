@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donut Calculators</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .section {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      font-size: 24px;
+      margin-top: 0;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    textarea {
+      width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; font-size: 16px; resize: vertical; font-family: Arial, sans-serif;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #e8f4fc;
+      border-radius: 5px;
+      font-size: 18px;
+      text-align: center;
+      color: #2c3e50;
+    }
+
+    .result p {
+      margin: 8px 0;
+    }
+
+    .total-profit {
+      font-size: 22px;
+      font-weight: bold;
+      color: #27ae60;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #777;
+      margin-top: 5px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { padding-top: 76px; }
+    .container { max-width: 900px; }
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      background: #2c3e50; box-shadow: 0 2px 10px rgba(0,0,0,.2);
+      display: flex; justify-content: center; gap: 8px; padding: 10px;
+    }
+    .navbar a { color: white; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; }
+    .navbar a:hover { background: rgba(255,255,255,.14); }
+    .section-title { scroll-margin-top: 80px; }
+    .subsection { margin-top: 24px; }
+    .calculator-card { border: 1px solid #e2e6ea; border-radius: 8px; padding: 18px; margin-top: 16px; background: #fff; }
+    .calculator-card h3 { color: #2c3e50; margin-top: 0; }
+    .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    .button-row { display:flex; gap:10px; }
+    button { font-family: inherit; }
+    .primary-button { width:100%; padding:10px; border:0; border-radius:5px; background:#2c3e50; color:#fff; cursor:pointer; font-size:16px; }
+    .danger-button { width:100%; padding:10px; border:1px solid #ccc; border-radius:5px; background:#fff; cursor:pointer; font-size:15px; }
+    .positive { color:#27ae60; font-weight:bold; }
+    .negative { color:#c0392b; font-weight:bold; }
+    .required { color:#c0392b; }
+    .legend-win { background:#d9f4df; }
+    .legend-lose { background:#f8dddd; }
+    .legend-unselected { background:#f5f6f7; }
+    #paperHistoryTable th, #paperHistoryTable td, #arrowHistoryTable th, #arrowHistoryTable td { padding:8px; border-bottom:1px solid #eee; }
+    #paperHistoryTable th, #arrowHistoryTable th { background:#f7f9fb; }
+    .swap-note { margin-top:8px; font-size:13px; color:#777; }
+    table th { background:#f7f9fb; }
+    #arrowGrid { display:grid; gap:2px; margin-top:15px; user-select:none; }
+    .arrow-cell { aspect-ratio:1; min-width:0; border:1px solid #c8cdd3; background:#f5f6f7; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative; font-size:12px; }
+    .arrow-cell:hover { background:#e9edf1; }
+    .arrow-cell.win { background:#d9f4df; border-color:#27ae60; }
+    .arrow-cell.lose { background:#f8dddd; border-color:#c0392b; }
+    .arrow-cell.center { box-shadow: inset 0 0 0 3px #34495e; }
+    .probability-label { font-size:11px; color:#555; position:absolute; bottom:2px; right:3px; }
+    .range-overlay { pointer-events:none; position:absolute; border:3px dashed #2c3e50; border-radius:50%; box-sizing:border-box; }
+    .grid-wrap { position:relative; width:100%; }
+    .legend { display:flex; gap:16px; flex-wrap:wrap; font-size:13px; margin-top:10px; }
+    .legend span { display:flex; align-items:center; gap:5px; }
+    .legend i { width:14px; height:14px; border:1px solid #aaa; display:inline-block; }
+    @media (max-width: 700px) { .two-column { grid-template-columns: 1fr; } .navbar a { padding:8px 10px; font-size:14px; } }
+
+    .tab-section { display:none; }
+    .tab-section.active { display:block; }
+    .navbar a.active { background: rgba(255,255,255,.20); }
+    .suggestion-row { display:flex; gap:10px; align-items:stretch; }
+    .suggestion-row input { flex:1; }
+    .small-button { padding:10px 12px; border:0; border-radius:5px; background:#2c3e50; color:white; cursor:pointer; white-space:nowrap; }
+    .stop-box { margin-top:10px; padding:10px; border-radius:6px; background:#fff3cd; color:#664d03; border:1px solid #ffe69c; }
+    .dispenser { font-weight:bold; font-size:16px; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar" aria-label="Main navigation">
+    <a href="#profit-section" data-tab="profit-section">Profit Calculator</a>
+    <a href="#gambling-section" data-tab="gambling-section">Gambling Calculator</a>
+    <a href="#settings-section" data-tab="settings-section">Settings</a>
+  </nav>
+
+  <div class="container">
+
+  <section id="profit-section" class="tab-section">
+    <div class="section">
+      <h2>Profit Calculator</h2>
+      <div class="hint" style="text-align:center;">Minecraft crafting and resale profit calculators</div>
+    </div>
+
+    <div class="section">
+
+      <h2>Deepslate Diamond Ore → Diamond Block Profit Calculator</h2>
+
+      <form id="profitForm">
+
+        <div class="form-group">
+          <label for="oreCost">
+            Cost per Deepslate Diamond Ore Block (Thousands)
+          </label>
+
+          <input
+            type="number"
+            id="oreCost"
+            step="0.01"
+            min="0"
+            placeholder="e.g. 10.8"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="blockPrice">
+            Price per Diamond Block (Thousands)
+          </label>
+
+          <input
+            type="number"
+            id="blockPrice"
+            step="0.01"
+            min="0"
+            placeholder="e.g. 48.2"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="oreAmount">
+            Amount of Deepslate Diamond Ore Bought (optional)
+          </label>
+
+          <input
+            type="number"
+            id="oreAmount"
+            step="1"
+            min="0"
+            placeholder="e.g. 100"
+          />
+
+          <div class="hint">
+            Leave blank if you only want to calculate profit per Diamond Block.
+          </div>
+          <button type="button" id="suggestDiamondOrderButton" class="small-button" style="margin-top:8px;">Suggest Amount to Order</button>
+          <div class="hint">Requires your balance in Settings. Suggests an order that uses up to 10% of your balance by default.</div>
+        </div>
+
+      </form>
+
+      <div id="result" class="result">
+        Enter a cost and price to calculate profit.
+      </div>
+
+    </div>
+
+    <div class="section">
+
+      <h2>Wind Burst 1 → Wind Burst 3 Profit Calculator</h2>
+
+      <form id="windBurstForm">
+
+        <div class="form-group">
+
+          <label for="windBurst1Cost">
+            Cost per Wind Burst 1 Book (Thousands)
+          </label>
+
+          <input
+            type="number"
+            id="windBurst1Cost"
+            step="0.01"
+            min="0"
+            placeholder="e.g. 500"
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="windBurst3Price">
+            Sell Price per Wind Burst 3 Book (Thousands)
+          </label>
+
+          <input
+            type="number"
+            id="windBurst3Price"
+            step="0.01"
+            min="0"
+            placeholder="e.g. 2200"
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label for="windBurst1Amount">
+            Amount of Wind Burst 1 Books Bought (optional)
+          </label>
+
+          <input
+            type="number"
+            id="windBurst1Amount"
+            step="1"
+            min="0"
+            placeholder="e.g. 100"
+          />
+
+          <div class="hint">
+            4 Wind Burst 1 Books are required to make 1 Wind Burst 3.
+          </div>
+
+        </div>
+
+      </form>
+
+      <div id="windBurstResult" class="result">
+        Enter a Wind Burst 1 cost and Wind Burst 3 sell price.
+      </div>
+
+    </div>
+
+    <div class="section">
+
+      <h2>Netherite Ingot Cost Calculator</h2>
+
+      <div class="form-group">
+
+        <label for="netheriteBlockCost">
+          Cost per Netherite Block (Millions)
+        </label>
+
+        <input
+          type="number"
+          id="netheriteBlockCost"
+          step="0.01"
+          min="0"
+          placeholder="e.g. 50.12"
+        />
+
+      </div>
+
+      <div id="netheriteResult" class="result">
+        Enter a Netherite Block cost.
+      </div>
+
+    </div>
+
+    <div class="section calculator-card" id="tnt-minecart">
+    <div class="section calculator-card" id="tnt-minecart">
+      <h2>TNT Minecart Calculator</h2>
+      <form id="tntMinecartForm">
+        <div class="form-group">
+          <label for="tntCost">Cost per TNT</label>
+          <input type="number" id="tntCost" step="0.01" min="0" placeholder="e.g. 2500" />
+        </div>
+        <div class="form-group">
+          <label for="ironCost">Cost per Iron Ingot</label>
+          <input type="number" id="ironCost" step="0.01" min="0" placeholder="e.g. 150" />
+        </div>
+        <div class="form-group">
+          <label for="tntMinecartSellPrice">Sell Price per TNT Minecart <span class="required">*</span></label>
+          <input type="number" id="tntMinecartSellPrice" step="0.01" min="0" placeholder="e.g. 3500" required />
+        </div>
+        <div class="form-group">
+          <label for="tntAmount">Amount of TNT Ordered (optional)</label>
+          <input type="number" id="tntAmount" step="1" min="0" placeholder="e.g. 100" />
+          <div class="hint">Entering TNT automatically fills Iron Ingots at 5 per TNT.</div>
+          <button type="button" id="suggestTntOrderButton" class="small-button" style="margin-top:8px;">Suggest Amount to Order</button>
+          <div class="hint">Requires your balance in Settings, TNT cost, Iron cost, and TNT Minecart sell price.</div>
+        </div>
+        <div class="form-group">
+          <label for="ironAmount">Amount of Iron Ingots Bought (optional)</label>
+          <input type="number" id="ironAmount" step="1" min="0" placeholder="e.g. 500" />
+          <div class="hint">Entering Iron automatically fills TNT at 1 TNT per 5 Iron Ingots, always rounded up to the nearest whole TNT.</div>
+        </div>
+      </form>
+      <div id="tntMinecartResult" class="result">Enter the TNT cost, Iron cost, and TNT Minecart sell price.</div>
+    </div>
+  </section>
+
+  <section id="gambling-section" class="tab-section">
+    <div class="section">
+      <h2>Gambling Calculator</h2>
+      <div class="hint" style="text-align:center;">Paper Game and Arrow Game strategy calculators.</div>
+
+      <div class="calculator-card" id="paper-game">
+        <h3>Paper Game</h3>
+        <p class="hint">Host has 1–9 and Viewer has 1–9. Host wins when Host ≥ Viewer. Viewer wins when Viewer &gt; Host and receives 2× their payment. Viewer win chance: 44.44%.</p>
+        <div class="two-column">
+          <div>
+            <div class="form-group"><label for="paperMin">Minimum Entry Price (Thousands)</label><input type="number" id="paperMin" step="0.01" min="0" placeholder="e.g. 100" /></div>
+            <div class="form-group"><label for="paperMax">Maximum Entry Price (Thousands)</label><input type="number" id="paperMax" step="0.01" min="0" placeholder="e.g. 1000" /></div>
+            <div id="paperGameStats" class="result">Enter a minimum and maximum entry price.</div>
+            <div class="form-group" style="margin-top:20px;">
+              <label>Record the latest result</label>
+              <div class="button-row">
+                <button type="button" id="paperWinButton" class="primary-button">Viewer Won</button>
+                <button type="button" id="paperLossButton" class="danger-button">Viewer Lost</button>
+              </div>
+              <div class="hint">Losses increase the next payment using a slowing logarithmic progression. Wins decrease the next payment by ½. The payment stays between your min and max.</div>
+            </div>
+            <div id="paperSuggestion" class="result">Enter valid min/max values to see a suggested payment.</div>
+          </div>
+          <div>
+            <h3 style="font-size:18px;">Simulation</h3>
+            <div class="form-group">
+              <label for="paperSimulationQuantity">Simulate Amount of Times</label>
+              <input type="number" id="paperSimulationQuantity" min="1" max="100" step="1" value="1" />
+              <div class="hint">Each simulation starts at the minimum and continues using the same payment logic until the stop suggestion is reached.</div>
+            </div>
+            <button type="button" id="paperSimulateButton" class="primary-button">Simulate</button>
+            <div id="paperSimulationResult" class="result">Enter min/max prices and a quantity to simulate.</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto; margin-top:20px;">
+          <table id="paperHistoryTable" style="width:100%;border-collapse:collapse;text-align:center;">
+            <thead><tr><th>Round</th><th>Result</th><th>Payment</th><th>Net</th><th>Cumulative</th><th>Next Suggestion</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="hint" style="margin-top:10px;"><strong>Net</strong> = profit/loss from that single round. <strong>Cumulative</strong> = the total net profit/loss from all recorded rounds up to that point.</div>
+        <button type="button" id="paperResetButton" class="danger-button" style="margin-top:15px;">Reset Paper Game History</button>
+      </div>
+
+      <div class="calculator-card" id="arrow-game">
+        <h3>Arrow Game Calculator</h3>
+        <p class="hint">Viewer pays the host an amount between the minimum and maximum. If the arrow lands on Lose, the host keeps the payment. If it lands on Win, the host pays the viewer 2× the payment.</p>
+        <div class="two-column">
+          <div>
+            <div class="form-group"><label for="arrowGridSize">Grid Width and Height (Odd Numbers, 1–11)</label><input type="number" id="arrowGridSize" min="1" max="11" step="2" value="11" /></div>
+            <div class="form-group"><label for="arrowMin">Minimum Entry Price (Thousands)</label><input type="number" id="arrowMin" step="0.01" min="0" placeholder="e.g. 100" /></div>
+            <div class="form-group"><label for="arrowMax">Maximum Entry Price (Thousands)</label><input type="number" id="arrowMax" step="0.01" min="0" placeholder="e.g. 1000" /></div>
+            <div id="arrowResult" class="result">Set the grid and mark cells as Win or Lose.</div>
+            <div class="button-row" style="margin-top:10px;">
+              <button type="button" id="swapArrowButton" class="primary-button">Swap Win / Lose</button>
+              <button type="button" id="resetArrowGridButton" class="danger-button">Reset Grid</button>
+            </div>
+            <div class="legend"><span><i class="legend-win"></i> Win</span><span><i class="legend-lose"></i> Lose</span><span><i class="legend-unselected"></i> Unselected</span></div>
+          </div>
+          <div>
+            <div class="result" id="arrowSuggestion">Enter valid min/max prices to see a suggested payment.</div>
+            <div class="form-group" style="margin-top:20px;">
+              <label>Record the latest result</label>
+              <div class="button-row">
+                <button type="button" id="arrowWinButton" class="primary-button">Viewer Won</button>
+                <button type="button" id="arrowLossButton" class="danger-button">Viewer Lost</button>
+              </div>
+              <div class="hint">Use these buttons after an actual Arrow Game round. The result is stored in the history and changes the next suggested payment.</div>
+            </div>
+            <h3 style="font-size:18px;margin-top:18px;">Simulation</h3>
+            <div class="form-group">
+              <label for="arrowSimulationQuantity">Simulate Amount of Times</label>
+              <input type="number" id="arrowSimulationQuantity" min="1" max="100" step="1" value="1" />
+              <div class="hint">Each simulation starts at the minimum and continues using the same payment logic until the stop suggestion is reached.</div>
+            </div>
+            <button type="button" id="arrowSimulateButton" class="primary-button">Simulate</button>
+            <div id="arrowSimulationResult" class="result">Enter min/max prices and a quantity to simulate.</div>
+          </div>
+        </div>
+        <div class="grid-wrap"><div id="arrowGrid"></div></div>
+        <div class="hint" style="margin-top:18px;"><strong>Arrow range:</strong> the dashed circle marks the approximate outer range represented by the supplied impact image. Cells outside that range have zero probability in this model.</div>
+        <div id="arrowProbabilityTable" style="margin-top:15px;"></div>
+        <div style="overflow-x:auto; margin-top:20px;">
+          <table id="arrowHistoryTable" style="width:100%;border-collapse:collapse;text-align:center;">
+            <thead><tr><th>Round</th><th>Result</th><th>Payment</th><th>Net</th><th>Cumulative</th><th>Next Suggestion</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="hint" style="margin-top:10px;"><strong>Net</strong> = profit/loss from that single round. <strong>Cumulative</strong> = the total net profit/loss from all recorded rounds up to that point.</div>
+        <button type="button" id="arrowResetHistoryButton" class="danger-button" style="margin-top:15px;">Reset Arrow Game History</button>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <section id="settings-section" class="tab-section">
+    <div class="section">
+      <h2>Settings</h2>
+      <div class="form-group">
+        <label for="balanceMillions">In-Game Balance (Millions, optional)</label>
+        <input type="number" id="balanceMillions" min="0" step="0.01" placeholder="e.g. 25" />
+        <div class="hint">Your balance is used by the order-size suggestion buttons. Leave blank if you do not want balance-based suggestions.</div>
+      </div>
+      </div>
+      <div id="settingsResult" class="result">Enter your balance if you want balance-based suggestions.</div>
+    </div>
+  </section>
+
+  <script>
+
+    function formatThousands(value) {
+      return Math.round(value * 1000).toLocaleString('en-US');
+    }
+
+    function formatStandard(value) {
+      return value.toLocaleString('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    const oreDiamonds = 2.2;
+    const blockDiamonds = 9;
+
+    function calculateProfit() {
+
+      const oreCostInput =
+        document.getElementById('oreCost').value;
+
+      const blockPriceInput =
+        document.getElementById('blockPrice').value;
+
+      const oreAmountInput =
+        document.getElementById('oreAmount').value;
+
+      const oreCost =
+        parseFloat(oreCostInput) || 0;
+
+      const blockPrice =
+        parseFloat(blockPriceInput) || 0;
+
+      const oreAmount =
+        parseFloat(oreAmountInput) || 0;
+
+      const result =
+        document.getElementById('result');
+
+      if (
+        oreCostInput === "" ||
+        blockPriceInput === "" ||
+        oreCost <= 0 ||
+        blockPrice <= 0
+      ) {
+
+        result.innerHTML =
+          "Enter a cost and price to calculate profit.";
+
+        return;
+      }
+      const oreBlocksNeeded =
+        blockDiamonds / oreDiamonds;
+
+      const totalOreCost =
+        oreBlocksNeeded * oreCost;
+
+      const profitPerBlock =
+        blockPrice - totalOreCost;
+
+      let output = `
+        <p>
+          Profit per Diamond Block:
+          <strong>${formatThousands(profitPerBlock)}</strong>
+        </p>
+      `;
+      if (
+        oreAmountInput !== "" &&
+        oreAmount > 0
+      ) {
+
+        const totalCost =
+          oreAmount * oreCost;
+
+        const totalDiamonds =
+          oreAmount * oreDiamonds;
+
+        const diamondBlocks =
+          totalDiamonds / blockDiamonds;
+
+        const totalRevenue =
+          diamondBlocks * blockPrice;
+
+        const totalProfit =
+          totalRevenue - totalCost;
+
+        output += `
+          <p>
+            Diamond Blocks Produced:
+            <strong>${diamondBlocks.toFixed(2)}</strong>
+          </p>
+
+          <p>
+            Total Ore Cost:
+            <strong>${formatThousands(totalCost)}</strong>
+          </p>
+
+          <p>
+            Total Revenue:
+            <strong>${formatThousands(totalRevenue)}</strong>
+          </p>
+
+          <p class="total-profit">
+            Total Profit:
+            ${formatThousands(totalProfit)}
+          </p>
+        `;
+      }
+
+      result.innerHTML = output;
+    }
+
+    function calculateWindBurstProfit() {
+
+      const windBurst1CostInput =
+        document.getElementById('windBurst1Cost').value;
+
+      const windBurst3PriceInput =
+        document.getElementById('windBurst3Price').value;
+
+      const windBurst1AmountInput =
+        document.getElementById('windBurst1Amount').value;
+
+      const windBurst1Cost =
+        parseFloat(windBurst1CostInput) || 0;
+
+      const windBurst3Price =
+        parseFloat(windBurst3PriceInput) || 0;
+
+      const windBurst1Amount =
+        parseFloat(windBurst1AmountInput) || 0;
+
+      const result =
+        document.getElementById('windBurstResult');
+
+      if (
+        windBurst1CostInput === "" ||
+        windBurst3PriceInput === "" ||
+        windBurst1Cost <= 0 ||
+        windBurst3Price <= 0
+      ) {
+
+        result.innerHTML =
+          "Enter a Wind Burst 1 cost and Wind Burst 3 sell price.";
+
+        return;
+      }
+      const windBurst1PerWindBurst3 = 4;
+      const costPerWindBurst3 =
+        windBurst1Cost * windBurst1PerWindBurst3;
+      const profitPerWindBurst3 =
+        windBurst3Price - costPerWindBurst3;
+
+      let output = `
+        <p>
+          Cost per Wind Burst 3:
+          <strong>
+            ${formatThousands(costPerWindBurst3)}
+          </strong>
+        </p>
+
+        <p>
+          Profit per Wind Burst 3:
+          <strong>
+            ${formatThousands(profitPerWindBurst3)}
+          </strong>
+        </p>
+      `;
+
+      if (
+        windBurst1AmountInput !== "" &&
+        windBurst1Amount > 0
+      ) {
+        const windBurst3Amount =
+          Math.floor(
+            windBurst1Amount / windBurst1PerWindBurst3
+          );
+        const windBurst1Used =
+          windBurst3Amount * windBurst1PerWindBurst3;
+        const totalCost =
+          windBurst1Used * windBurst1Cost;
+        const totalRevenue =
+          windBurst3Amount * windBurst3Price;
+        const totalProfit =
+          totalRevenue - totalCost;
+        const leftoverWindBurst1 =
+          windBurst1Amount - windBurst1Used;
+
+        output += `
+          <p>
+            Wind Burst 3 Books Produced:
+            <strong>
+              ${windBurst3Amount.toLocaleString('en-US')}
+            </strong>
+          </p>
+
+          <p>
+            Wind Burst 1 Books Used:
+            <strong>
+              ${windBurst1Used.toLocaleString('en-US')}
+            </strong>
+          </p>
+
+          <p>
+            Leftover Wind Burst 1 Books:
+            <strong>
+              ${leftoverWindBurst1.toLocaleString('en-US')}
+            </strong>
+          </p>
+
+          <p>
+            Total Cost:
+            <strong>
+              ${formatThousands(totalCost)}
+            </strong>
+          </p>
+
+          <p>
+            Total Revenue:
+            <strong>
+              ${formatThousands(totalRevenue)}
+            </strong>
+          </p>
+
+          <p class="total-profit">
+            Total Profit:
+            ${formatThousands(totalProfit)}
+          </p>
+        `;
+      }
+
+      result.innerHTML = output;
+    }
+
+    function calculateNetherite() {
+
+      const blockCostInput =
+        document.getElementById('netheriteBlockCost').value;
+
+      const blockCostMillions =
+        parseFloat(blockCostInput) || 0;
+
+      const result =
+        document.getElementById('netheriteResult');
+
+      if (
+        blockCostInput === "" ||
+        blockCostMillions <= 0
+      ) {
+
+        result.innerHTML =
+          "Enter a Netherite Block cost.";
+
+        return;
+      }
+
+      const blockCost =
+        blockCostMillions * 1000000;
+      const ingotCost =
+        blockCost / 9;
+
+      result.innerHTML = `
+        Cost per Netherite Ingot:
+        <strong>
+          ${formatStandard(ingotCost)}
+        </strong>
+      `;
+    }
+
+    document
+      .querySelectorAll('#profitForm input')
+      .forEach(input => {
+
+        input.addEventListener(
+          'input',
+          calculateProfit
+        );
+
+      });
+    document
+      .querySelectorAll('#windBurstForm input')
+      .forEach(input => {
+
+        input.addEventListener(
+          'input',
+          calculateWindBurstProfit
+        );
+
+      });
+    document
+      .getElementById('netheriteBlockCost')
+      .addEventListener(
+        'input',
+        calculateNetherite
+      );
+
+    calculateProfit();
+    calculateWindBurstProfit();
+    calculateNetherite();
+    let tntAmountLastEdited = null;
+
+    function calculateTntMinecart() {
+      const tntCostInput = document.getElementById('tntCost').value;
+      const ironCostInput = document.getElementById('ironCost').value;
+      const sellPriceInput = document.getElementById('tntMinecartSellPrice').value;
+      const tntAmountEl = document.getElementById('tntAmount');
+      const ironAmountEl = document.getElementById('ironAmount');
+      const result = document.getElementById('tntMinecartResult');
+
+      if (tntAmountLastEdited === 'tnt') {
+        if (tntAmountEl.value === '') ironAmountEl.value = '';
+        else if (Number.isFinite(parseFloat(tntAmountEl.value))) {
+          ironAmountEl.value = String(Math.max(0, Math.round(parseFloat(tntAmountEl.value) * 5)));
+        }
+      } else if (tntAmountLastEdited === 'iron') {
+        if (ironAmountEl.value === '') tntAmountEl.value = '';
+        else if (Number.isFinite(parseFloat(ironAmountEl.value))) {
+          tntAmountEl.value = String(Math.max(0, Math.round(parseFloat(ironAmountEl.value) / 5)));
+        }
+      }
+
+      const tntCost = parseFloat(tntCostInput);
+      const ironCost = parseFloat(ironCostInput);
+      const sellPrice = parseFloat(sellPriceInput);
+
+      if (!Number.isFinite(tntCost) || tntCost <= 0 ||
+          !Number.isFinite(ironCost) || ironCost <= 0 ||
+          !Number.isFinite(sellPrice) || sellPrice <= 0) {
+        result.innerHTML = 'Enter the TNT cost, Iron Ingot cost, and required TNT Minecart sell price.';
+        return;
+      }
+
+      const costPerMinecart = tntCost + 5 * ironCost;
+      const profitPerMinecart = sellPrice - costPerMinecart;
+      let output = `<p>Cost per TNT Minecart: <strong>${formatStandard(costPerMinecart)}</strong></p>
+        <p>Profit per TNT Minecart: <strong class="${profitPerMinecart >= 0 ? 'positive' : 'negative'}">${profitPerMinecart >= 0 ? '+' : ''}${formatStandard(profitPerMinecart)}</strong></p>
+        <p class="hint">1 TNT + 5 Iron Ingots = 1 TNT Minecart.</p>`;
+
+      const tntAmount = parseInt(tntAmountEl.value, 10);
+      const ironAmount = parseInt(ironAmountEl.value, 10);
+      if ((Number.isFinite(tntAmount) && tntAmount > 0) || (Number.isFinite(ironAmount) && ironAmount > 0)) {
+        const minecarts = Math.floor(Math.min(
+          Number.isFinite(tntAmount) ? tntAmount : Infinity,
+          Number.isFinite(ironAmount) ? ironAmount / 5 : Infinity
+        ));
+        if (minecarts > 0) {
+          const totalCost = minecarts * costPerMinecart;
+          const totalRevenue = minecarts * sellPrice;
+          const totalProfit = totalRevenue - totalCost;
+          output += `<p>TNT Minecarts Produced: <strong>${minecarts.toLocaleString('en-US')}</strong></p>
+            <p>TNT Used: <strong>${minecarts.toLocaleString('en-US')}</strong></p>
+            <p>Iron Ingots Used: <strong>${(minecarts * 5).toLocaleString('en-US')}</strong></p>
+            <p>Total Cost: <strong>${formatStandard(totalCost)}</strong></p>
+            <p>Total Revenue: <strong>${formatStandard(totalRevenue)}</strong></p>
+            <p class="total-profit ${totalProfit < 0 ? 'negative' : ''}">Total Profit: ${totalProfit >= 0 ? '+' : ''}${formatStandard(totalProfit)}</p>`;
+        }
+      }
+      result.innerHTML = output;
+    }
+
+    const GAME_WIN_RATE_PAPER = 36 / 81;
+    const arrowGameHistory = [];
+    const paperGameHistory = [];
+    let paperNextSuggestion = null;
+    let arrowNextSuggestion = null;
+
+    function moneyK(value) { return `${formatStandard(value)}k`; }
+
+    function getValues(minId, maxId) {
+      return { min: parseFloat(document.getElementById(minId).value), max: parseFloat(document.getElementById(maxId).value) };
+    }
+
+    function roundSuggestion(value, min) {
+      if (min < 1000) return Math.max(min, value);
+      return Math.max(min, Math.floor(value / 1000) * 1000);
+    }
+
+    function getStopState(history, winRate = GAME_WIN_RATE_PAPER, minK = NaN, maxK = NaN) {
+      const profit = (history || []).reduce((sum, r) => sum + r.net, 0);
+      if (profit <= 0 || !history.length || !Number.isFinite(minK) || !Number.isFinite(maxK) || winRate >= 0.5) return { stop: false, reason: '' };
+      const last = history[history.length - 1];
+      const next = getNextPayment(minK, maxK, last.payment, last.result, history, winRate);
+      const threshold = Math.max(minK * 4, next * 1.5);
+      if (profit >= threshold) return { stop: true, reason: `You're up ${moneyK(profit)}. This is a relatively large profit compared with the size of your wagers. Since this game has only a ${(winRate * 100).toFixed(2)}% viewer win chance, consider stopping and keeping the profit.` };
+      return { stop: false, reason: '' };
+    }
+
+    function getNextPayment(min, max, lastPayment, lastResult, history, winRate = GAME_WIN_RATE_PAPER) {
+      let next;
+      if (!Number.isFinite(lastPayment)) next = min;
+      else if (lastResult === 'lost') next = getLossProgression(lastPayment, min, max, history || []);
+      else next = Math.max(min, lastPayment * 0.25);
+      next = Math.min(max, Math.max(min, next));
+      return roundSuggestion(next, min);
+    }
+
+    function getLossProgression(lastPayment, min, max, history) {
+      const cumulativeLoss = Math.max(0, -(history || []).reduce((sum, r) => sum + r.net, 0));
+      const reference = Math.max(min, lastPayment * 4);
+      const decay = 1 + Math.log1p(cumulativeLoss / reference);
+      const increment = Math.max(min, lastPayment) / decay;
+      return lastPayment + increment;
+    }
+
+    function updatePaperGame() {
+      const { min, max } = getValues('paperMin', 'paperMax');
+      const stats = document.getElementById('paperGameStats');
+      const suggestion = document.getElementById('paperSuggestion');
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max < min) {
+        stats.innerHTML = 'Enter valid minimum and maximum entry prices in thousands.';
+        suggestion.innerHTML = 'Enter valid min/max values to see a suggested payment.';
+        paperNextSuggestion = null; renderPaperHistory(); return;
+      }
+      const wins = paperGameHistory.filter(r => r.result === 'won').length;
+      const losses = paperGameHistory.length - wins;
+      const rounds = paperGameHistory.length;
+      const observedWinRate = rounds ? wins / rounds : GAME_WIN_RATE_PAPER;
+      const profit = paperGameHistory.reduce((sum, r) => sum + r.net, 0);
+      const stop = getStopState(paperGameHistory, GAME_WIN_RATE_PAPER, min, max);
+      const last = paperGameHistory[paperGameHistory.length - 1];
+      paperNextSuggestion = getNextPayment(min, max, last ? last.payment : NaN, last ? last.result : null, paperGameHistory, GAME_WIN_RATE_PAPER);
+      stats.innerHTML = `<p>Theoretical viewer win chance: <strong>${(GAME_WIN_RATE_PAPER * 100).toFixed(2)}%</strong></p><p>Observed record: <strong>${wins} wins / ${losses} losses</strong> (${(observedWinRate * 100).toFixed(2)}%)</p><p>Net profit: <strong class="${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}${moneyK(profit)}</strong></p>`;
+      if (stop.stop) suggestion.innerHTML = `<div class="stop-box"><strong>STOP SUGGESTION:</strong> ${stop.reason}</div><p><strong>Suggested next payment: ${moneyK(paperNextSuggestion)}</strong></p><p class="hint">You can still record another win or loss. The stop is only a suggestion.</p>`;
+      else {
+        const trend = rounds === 0 ? 'Start at your minimum.' : last.result === 'lost' ? 'Loss recorded → increase the next payment using a slowing logarithmic progression.' : 'Win recorded → sharply decrease the next payment toward the minimum.';
+        suggestion.innerHTML = `<p><strong>Suggested next payment: ${moneyK(paperNextSuggestion)}</strong></p><p>${trend}</p><p class="hint">Payment is capped at max and floored at min. Suggestions are rounded down to the nearest million when the minimum is at least 1M.</p>`;
+      }
+      renderPaperHistory();
+    }
+
+    function recordPaperResult(result) {
+      if (paperNextSuggestion === null) updatePaperGame();
+      if (paperNextSuggestion === null) return;
+      const payment = paperNextSuggestion;
+      paperGameHistory.push({ result, payment, net: result === 'won' ? payment : -payment });
+      updatePaperGame();
+    }
+
+    function renderPaperHistory() {
+      const tbody = document.querySelector('#paperHistoryTable tbody'); if (!tbody) return;
+      tbody.innerHTML = ''; let cumulative = 0;
+      paperGameHistory.forEach((round, index) => {
+        cumulative += round.net;
+        const next = paperGameHistory[index + 1];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${index + 1}</td><td>${round.result === 'won' ? 'Won' : 'Lost'}</td><td class="editable-payment" data-game="paper" data-index="${index}" title="Double-click to edit">${moneyK(round.payment)}</td><td class="${round.net >= 0 ? 'positive' : 'negative'}">${round.net >= 0 ? '+' : ''}${moneyK(round.net)}</td><td class="${cumulative >= 0 ? 'positive' : 'negative'}">${cumulative >= 0 ? '+' : ''}${moneyK(cumulative)}</td><td>${next ? moneyK(next.payment) : '—'}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function simulateGamble(simulations, min, max, winRate) {
+      const results = [];
+      const SAFETY_ROUND_LIMIT = 10000;
+      for (let simIndex = 0; simIndex < simulations; simIndex++) {
+        let payment = min, totalPaid = 0, totalReceived = 0, wins = 0, losses = 0, profit = 0;
+        const history = [];
+        for (let round = 0; round < SAFETY_ROUND_LIMIT; round++) {
+          const won = Math.random() < winRate;
+          totalPaid += payment;
+          const net = won ? payment : -payment;
+          if (won) { wins++; totalReceived += payment * 2; } else losses++;
+          profit += net;
+          history.push({ result: won ? 'won' : 'lost', payment, net });
+          const stop = getStopState(history, winRate, min, max);
+          if (stop.stop) break;
+          payment = getNextPayment(min, max, payment, won ? 'won' : 'lost', history, winRate);
+        }
+        results.push({ profit, totalPaid, totalReceived, wins, losses, rounds: wins + losses });
+      }
+      return results;
+    }
+
+    function renderSimulationResults(resultEl, results) {
+      const profitable = results.filter(r => r.profit > 0).length;
+      const avg = key => results.reduce((sum, r) => sum + r[key], 0) / results.length;
+      if (results.length === 1) {
+        const r = results[0];
+        resultEl.innerHTML = `<p>Profit: <strong class="${r.profit >= 0 ? 'positive' : 'negative'}">${r.profit >= 0 ? '+' : ''}${moneyK(r.profit)}</strong></p><p>Total Paid: <strong>${moneyK(r.totalPaid)}</strong></p><p>Total Received: <strong>${moneyK(r.totalReceived)}</strong></p><p># of Wins: <strong>${r.wins}</strong></p><p># of Losses: <strong>${r.losses}</strong></p><p>Payments Simulated: <strong>${r.rounds}</strong></p>`;
+      } else {
+        resultEl.innerHTML = `<p>Simulations With Profit: <strong>${((profitable / results.length) * 100).toFixed(2)}%</strong></p><p>Average Profit Gain: <strong class="${avg('profit') >= 0 ? 'positive' : 'negative'}">${avg('profit') >= 0 ? '+' : ''}${moneyK(avg('profit'))}</strong></p><p>Average Total Paid: <strong>${moneyK(avg('totalPaid'))}</strong></p><p>Average Total Received: <strong>${moneyK(avg('totalReceived'))}</strong></p><p>Average # of Wins: <strong>${avg('wins').toFixed(2)}</strong></p><p>Average # of Losses: <strong>${avg('losses').toFixed(2)}</strong></p><p>Average Payments Simulated: <strong>${avg('rounds').toFixed(2)}</strong></p>`;
+      }
+    }
+
+    function simulatePaperPayments() {
+      const { min, max } = getValues('paperMin', 'paperMax');
+      const times = parseInt(document.getElementById('paperSimulationQuantity').value, 10);
+      const result = document.getElementById('paperSimulationResult');
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max < min) { result.innerHTML = 'Enter valid min/max entry prices first.'; return; }
+      if (!Number.isInteger(times) || times < 1 || times > 100) { result.innerHTML = 'Enter a simulation amount from 1 to 100.'; return; }
+      renderSimulationResults(result, simulateGamble(times, min, max, GAME_WIN_RATE_PAPER));
+    }
+    let arrowSelections = [];
+    const ARROW_MAX_RADIUS = 5.0;
+
+    function normalizeOddSize(value) {
+      let n = parseInt(value, 10);
+      if (!Number.isFinite(n)) n = 11;
+      n = Math.max(1, Math.min(11, n));
+      if (n % 2 === 0) n += n === 11 ? -1 : 1;
+      return n;
+    }
+
+    function arrowProbability(dx, dy) {
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      if (distance > ARROW_MAX_RADIUS) return 0;
+      const sigma = 2.05;
+      return Math.exp(-(distance * distance) / (2 * sigma * sigma));
+    }
+
+    function createCheckerboard(size) {
+      return Array.from({ length: size }, (_, y) => Array.from({ length: size }, (_, x) => ((x + y) % 2 === 0 ? 'lose' : 'win')));
+    }
+
+    function buildArrowGrid(resetSelections = true) {
+      const sizeEl = document.getElementById('arrowGridSize');
+      const size = normalizeOddSize(sizeEl.value);
+      sizeEl.value = size;
+      if (resetSelections || arrowSelections.length !== size || arrowSelections.some(row => row.length !== size)) arrowSelections = createCheckerboard(size);
+      renderArrowGrid();
+    }
+
+    function renderArrowGrid() {
+      const size = normalizeOddSize(document.getElementById('arrowGridSize').value);
+      document.getElementById('arrowGridSize').value = size;
+      const grid = document.getElementById('arrowGrid');
+      grid.innerHTML = '';
+      grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+      const cx = (size - 1) / 2, cy = cx;
+      const raw = [];
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) raw.push(arrowProbability(x - cx, y - cy));
+      const total = raw.reduce((a, b) => a + b, 0);
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        const p = total ? raw[y * size + x] / total : 0;
+        const cell = document.createElement('div');
+        const isCenter = x === cx && y === cy;
+        cell.className = 'arrow-cell' + (isCenter ? ' center' : '');
+        if (arrowSelections[y][x] === 'win') cell.classList.add('win');
+        if (arrowSelections[y][x] === 'lose') cell.classList.add('lose');
+        cell.title = isCenter ? `DISPENSER — arrow probability: ${(p * 100).toFixed(2)}%` : p > 0 ? `Arrow probability: ${(p * 100).toFixed(2)}%` : 'Outside the modeled arrow range';
+        cell.innerHTML = isCenter ? `<span class="dispenser">D</span><span class="probability-label">${(p * 100).toFixed(1)}%</span>` : `<span>${p > 0 ? (p * 100).toFixed(1) + '%' : '—'}</span>`;
+        cell.addEventListener('click', e => { e.preventDefault(); arrowSelections[y][x] = arrowSelections[y][x] === 'lose' ? 'win' : 'lose'; renderArrowGrid(); });
+        cell.addEventListener('contextmenu', e => { e.preventDefault(); arrowSelections[y][x] = arrowSelections[y][x] === 'win' ? 'lose' : 'win'; renderArrowGrid(); });
+        grid.appendChild(cell);
+      }
+      const wrap = document.querySelector('.grid-wrap');
+      const oldOverlay = wrap.querySelector('.range-overlay'); if (oldOverlay) oldOverlay.remove();
+      requestAnimationFrame(() => {
+        const cellSize = grid.getBoundingClientRect().width / size;
+        const diameter = ARROW_MAX_RADIUS * 2 * cellSize;
+        const overlay = document.createElement('div'); overlay.className = 'range-overlay'; overlay.style.width = `${diameter}px`; overlay.style.height = `${diameter}px`;
+        overlay.style.left = `${cx * cellSize + cellSize / 2 - diameter / 2}px`; overlay.style.top = `${cy * cellSize + cellSize / 2 - diameter / 2}px`; wrap.appendChild(overlay);
+      });
+      updateArrowResult();
+      renderArrowProbabilityTable();
+    }
+
+    function getArrowProbabilityStats() {
+      const size = normalizeOddSize(document.getElementById('arrowGridSize').value);
+      const cx = (size - 1) / 2, cy = cx;
+      let total = 0, win = 0, lose = 0, unselected = 0;
+      for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+        const p = arrowProbability(x - cx, y - cy); total += p;
+        if (arrowSelections[y][x] === 'win') win += p; else if (arrowSelections[y][x] === 'lose') lose += p; else unselected += p;
+      }
+      return { winRate: total ? win / total : 0, loseRate: total ? lose / total : 0, unselectedRate: total ? unselected / total : 0 };
+    }
+
+    function updateArrowResult() {
+      const stats = getArrowProbabilityStats();
+      document.getElementById('arrowResult').innerHTML = `<p>Win probability: <strong>${(stats.winRate * 100).toFixed(2)}%</strong></p>
+        <p>Lose probability: <strong>${(stats.loseRate * 100).toFixed(2)}%</strong></p><p>Unselected probability: <strong>${(stats.unselectedRate * 100).toFixed(2)}%</strong></p>
+        <p class="hint">Left click = Lose · Right click = Win · The center cell is always the dispenser.</p>`;
+      updateArrowSuggestion();
+    }
+
+    function updateArrowSuggestion() {
+      const { min, max } = getValues('arrowMin', 'arrowMax');
+      const suggestion = document.getElementById('arrowSuggestion');
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max < min) { suggestion.innerHTML = 'Enter valid min/max prices to see a suggested payment.'; arrowNextSuggestion = null; renderArrowHistory(); return; }
+      const stats = getArrowProbabilityStats();
+      const wins = arrowGameHistory.filter(r => r.result === 'won').length, losses = arrowGameHistory.length - wins;
+      const last = arrowGameHistory[arrowGameHistory.length - 1];
+      const stop = getStopState(arrowGameHistory, stats.winRate, min, max);
+      arrowNextSuggestion = getNextPayment(min, max, last ? last.payment : NaN, last ? last.result : null, arrowGameHistory, stats.winRate);
+      const profit = arrowGameHistory.reduce((sum, r) => sum + r.net, 0);
+      if (stop.stop) suggestion.innerHTML = `<div class="stop-box"><strong>STOP SUGGESTION:</strong> ${stop.reason}</div><p><strong>Suggested next payment: ${moneyK(arrowNextSuggestion)}</strong></p><p class="hint">You can still record another win or loss. The stop is only a suggestion.</p>`;
+      else suggestion.innerHTML = `<p><strong>Suggested next payment: ${moneyK(arrowNextSuggestion)}</strong></p><p>Current grid win probability: <strong>${(stats.winRate * 100).toFixed(2)}%</strong></p><p>Recorded: <strong>${wins} wins / ${losses} losses</strong></p><p>Net profit: <strong class="${profit >= 0 ? 'positive' : 'negative'}">${profit >= 0 ? '+' : ''}${moneyK(profit)}</strong></p><p class="hint">Loss → slowing logarithmic increase. Win → sharply decrease the next payment toward the minimum. Suggestions are rounded down to the nearest million when the minimum is at least 1M.</p>`;
+      renderArrowHistory();
+    }
+
+    function recordArrowResult(result) {
+      if (arrowNextSuggestion === null) updateArrowSuggestion();
+      if (arrowNextSuggestion === null) return;
+      const payment = arrowNextSuggestion;
+      arrowGameHistory.push({ result, payment, net: result === 'won' ? payment : -payment });
+      updateArrowSuggestion();
+    }
+
+    function renderArrowHistory() {
+      const tbody = document.querySelector('#arrowHistoryTable tbody'); if (!tbody) return;
+      tbody.innerHTML = ''; let cumulative = 0;
+      arrowGameHistory.forEach((round, index) => { cumulative += round.net; const next = arrowGameHistory[index + 1]; const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${index + 1}</td><td>${round.result === 'won' ? 'Won' : 'Lost'}</td><td class="editable-payment" data-game="arrow" data-index="${index}" title="Double-click to edit">${moneyK(round.payment)}</td><td class="${round.net >= 0 ? 'positive' : 'negative'}">${round.net >= 0 ? '+' : ''}${moneyK(round.net)}</td><td class="${cumulative >= 0 ? 'positive' : 'negative'}">${cumulative >= 0 ? '+' : ''}${moneyK(cumulative)}</td><td>${next ? moneyK(next.payment) : '—'}</td>`; tbody.appendChild(tr); });
+    }
+
+    function simulateArrowPayments() {
+      const { min, max } = getValues('arrowMin', 'arrowMax');
+      const times = parseInt(document.getElementById('arrowSimulationQuantity').value, 10);
+      const result = document.getElementById('arrowSimulationResult');
+      if (!Number.isFinite(min) || !Number.isFinite(max) || min <= 0 || max < min) { result.innerHTML = 'Enter valid min/max entry prices first.'; return; }
+      if (!Number.isInteger(times) || times < 1 || times > 100) { result.innerHTML = 'Enter a simulation amount from 1 to 100.'; return; }
+      const stats = getArrowProbabilityStats();
+      renderSimulationResults(result, simulateGamble(times, min, max, stats.winRate));
+    }
+
+    function editHistoryPayment(game, index) {
+      const history = game === 'paper' ? paperGameHistory : arrowGameHistory;
+      const current = history[index];
+      const value = prompt('Enter the new payment amount in thousands:', current ? current.payment : '');
+      if (value === null) return;
+      const payment = parseFloat(value);
+      if (!Number.isFinite(payment) || payment <= 0) return;
+      current.payment = payment;
+      current.net = current.result === 'won' ? payment : -payment;
+      if (game === 'paper') updatePaperGame(); else updateArrowSuggestion();
+    }
+
+    document.addEventListener('dblclick', e => {
+      const cell = e.target.closest('.editable-payment');
+      if (cell) editHistoryPayment(cell.dataset.game, parseInt(cell.dataset.index, 10));
+    });
+
+    function swapArrowWinLose() { arrowSelections = arrowSelections.map(row => row.map(value => value === 'win' ? 'lose' : value === 'lose' ? 'win' : '')); renderArrowGrid(); }
+    function resetArrowGrid() { const size = normalizeOddSize(document.getElementById('arrowGridSize').value); arrowSelections = createCheckerboard(size); renderArrowGrid(); }
+    function suggestDiamondOrder() {
+      const balanceM = parseFloat(document.getElementById('balanceMillions').value);
+      const oreCost = parseFloat(document.getElementById('oreCost').value);
+      const blockPrice = parseFloat(document.getElementById('blockPrice').value);
+      const amountEl = document.getElementById('oreAmount');
+      if (!Number.isFinite(balanceM) || balanceM <= 0) { amountEl.focus(); alert('Enter your in-game balance in Settings first.'); return; }
+      if (!Number.isFinite(oreCost) || oreCost <= 0 || !Number.isFinite(blockPrice) || blockPrice <= 0) { alert('Enter the deepslate diamond cost and diamond block price first.'); return; }
+      const balanceK = balanceM * 1000;
+      const costPerOreK = oreCost;
+      const maxBudgetK = balanceK * 0.10;
+      const profitable = blockPrice - (9 / 2.2) * oreCost;
+      const amount = Math.max(1, Math.floor(maxBudgetK / costPerOreK));
+      amountEl.value = amount;
+      amountEl.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function suggestTntOrder() {
+      const balanceM = parseFloat(document.getElementById('balanceMillions').value);
+      const tntCost = parseFloat(document.getElementById('tntCost').value);
+      const ironCost = parseFloat(document.getElementById('ironCost').value);
+      const sell = parseFloat(document.getElementById('tntMinecartSellPrice').value);
+      if (!Number.isFinite(balanceM) || balanceM <= 0) { alert('Enter your in-game balance in Settings first.'); return; }
+      if (![tntCost, ironCost, sell].every(v => Number.isFinite(v) && v > 0)) { alert('Enter TNT cost, Iron cost, and TNT Minecart sell price first.'); return; }
+      const cost = tntCost + 5 * ironCost;
+      const maxBudget = balanceM * 1000 * 0.10;
+      const amount = Math.max(1, Math.floor(maxBudget / cost));
+      const el = document.getElementById('tntAmount'); el.value = amount; tntAmountLastEdited = 'tnt'; el.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    function activateTab(id) {
+      document.querySelectorAll('.tab-section').forEach(sec => sec.classList.toggle('active', sec.id === id));
+      document.querySelectorAll('.navbar a[data-tab]').forEach(a => a.classList.toggle('active', a.dataset.tab === id));
+      history.replaceState(null, '', '#' + id);
+    }
+
+    document.querySelectorAll('.navbar a[data-tab]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); activateTab(a.dataset.tab); }));
+
+    document.getElementById('tntAmount').addEventListener('input', () => { tntAmountLastEdited = 'tnt'; calculateTntMinecart(); });
+    document.getElementById('ironAmount').addEventListener('input', () => { tntAmountLastEdited = 'iron'; calculateTntMinecart(); });
+    document.querySelectorAll('#tntMinecartForm input').forEach(input => { if (!['tntAmount','ironAmount'].includes(input.id)) input.addEventListener('input', calculateTntMinecart); });
+    document.getElementById('suggestTntOrderButton').addEventListener('click', suggestTntOrder);
+    document.getElementById('suggestDiamondOrderButton').addEventListener('click', suggestDiamondOrder);
+
+    document.getElementById('paperMin').addEventListener('input', updatePaperGame);
+    document.getElementById('paperMax').addEventListener('input', updatePaperGame);
+    document.getElementById('paperWinButton').addEventListener('click', () => recordPaperResult('won'));
+    document.getElementById('paperLossButton').addEventListener('click', () => recordPaperResult('lost'));
+    document.getElementById('paperResetButton').addEventListener('click', () => { paperGameHistory.length = 0; updatePaperGame(); });
+    document.getElementById('paperSimulateButton').addEventListener('click', simulatePaperPayments);
+
+    document.getElementById('arrowGridSize').addEventListener('input', () => buildArrowGrid(true));
+    document.getElementById('arrowGridSize').addEventListener('change', () => buildArrowGrid(true));
+    document.getElementById('arrowMin').addEventListener('input', updateArrowSuggestion);
+    document.getElementById('arrowMax').addEventListener('input', updateArrowSuggestion);
+    document.getElementById('arrowWinButton').addEventListener('click', () => recordArrowResult('won'));
+    document.getElementById('arrowLossButton').addEventListener('click', () => recordArrowResult('lost'));
+    document.getElementById('swapArrowButton').addEventListener('click', swapArrowWinLose);
+    document.getElementById('resetArrowGridButton').addEventListener('click', resetArrowGrid);
+    document.getElementById('arrowSimulateButton').addEventListener('click', simulateArrowPayments);
+    document.getElementById('arrowResetHistoryButton').addEventListener('click', () => { arrowGameHistory.length = 0; updateArrowSuggestion(); });
+    document.getElementById('balanceMillions').addEventListener('input', () => { localStorage.setItem('donutBalanceMillions', document.getElementById('balanceMillions').value); document.getElementById('settingsResult').innerHTML = 'Balance saved. You can now use balance-based suggestion buttons.'; });
+
+    const savedBalance = localStorage.getItem('donutBalanceMillions');
+    if (savedBalance !== null) document.getElementById('balanceMillions').value = savedBalance;
+
+    calculateTntMinecart();
+    updatePaperGame();
+    buildArrowGrid(true);
+    activateTab(location.hash === '#gambling-section' ? 'gambling-section' : location.hash === '#settings-section' ? 'settings-section' : 'profit-section');
+
+  </script>
+
+</body>
+</html>
