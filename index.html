@@ -843,8 +843,8 @@
 
     function getLossProgression(lastPayment, min, max, history) {
       const cumulativeLoss = Math.max(0, -(history || []).reduce((sum, r) => sum + r.net, 0));
-      const reference = Math.max(min, lastPayment * 4);
-      const decay = 1 + Math.log1p(cumulativeLoss / reference);
+      const reference = Math.max(min, lastPayment * 3);
+      const decay = 1 + 0.55 * Math.log1p(cumulativeLoss / reference);
       const increment = Math.max(min, lastPayment) / decay;
       return lastPayment + increment;
     }
